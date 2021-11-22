@@ -16,7 +16,7 @@ class DropdownBanner extends StatefulWidget {
   final Widget child;
   final GlobalKey<NavigatorState> navigatorKey;
 
-  DropdownBanner({@required this.child, @required this.navigatorKey}) {
+  DropdownBanner({required this.child, required this.navigatorKey}) {
     DartNotificationCenter.registerChannel(channel: _BANNERCHANNEL);
   }
 
@@ -27,11 +27,11 @@ class DropdownBanner extends StatefulWidget {
   /// for the [duration] specified. If the banner is tapped and [tapCallback] != null,
   /// the callback will be executed and the banner dismissed.
   static showBanner({
-    @required String text,
-    Duration duration,
-    Color color,
-    TextStyle textStyle,
-    VoidCallback tapCallback,
+    required String text,
+    Duration? duration,
+    Color? color,
+    TextStyle? textStyle,
+    VoidCallback? tapCallback,
   }) {
     DartNotificationCenter.post(
       channel: _BANNERCHANNEL,
@@ -143,7 +143,7 @@ class _BannerInstance extends StatefulWidget {
   final TextStyle textStyle;
 
   /// Action to perform on tap
-  final VoidCallback tapAction;
+  final VoidCallback? tapAction;
 
   /// Callback to remove from parent render tree
   final _IntCallback onCompletion;
@@ -160,10 +160,10 @@ class _BannerInstanceState extends State<_BannerInstance> {
   bool isActive = true;
 
   /// The timer for removing banner from screen (if not tapped first)
-  Timer timer;
+  Timer? timer;
 
   /// The height of the banner being presented (for animating it in/out)
-  double bannerHeight;
+  double? bannerHeight;
 
   @override
   void initState() {
@@ -179,19 +179,21 @@ class _BannerInstanceState extends State<_BannerInstance> {
     );
 
     // Get size of banner after first render pass
-    WidgetsBinding.instance.addPostFrameCallback(
-        (duration) => setState(() => this.bannerHeight = context.size.height));
+    WidgetsBinding.instance?.addPostFrameCallback(
+        (duration) => setState(() => this.bannerHeight = context.size?.height));
   }
 
-  void dismissAndDispose([TapUpDetails details]) {
+  void dismissAndDispose([TapUpDetails? details]) {
     // Cancel delayed timer
-    timer.cancel();
+    timer?.cancel();
 
     // Dismiss banner
     setState(() => isActive = false);
 
     // Only call tapAction if it exists, and if banner was dismissed from a tap action
-    if (widget.tapAction != null && details != null) widget.tapAction();
+    if (widget.tapAction != null && details != null) {
+      widget.tapAction!();
+    }
 
     // Remove as soon as animation is done
     Timer(
@@ -203,7 +205,7 @@ class _BannerInstanceState extends State<_BannerInstance> {
   @override
   build(BuildContext context) {
     final top =
-        bannerHeight == null ? -120.0 : (isActive ? 0.0 : -bannerHeight);
+        bannerHeight == null ? -120.0 : (isActive ? 0.0 : -bannerHeight!);
 
     return AnimatedPositioned(
       key: widget.key,
@@ -214,7 +216,7 @@ class _BannerInstanceState extends State<_BannerInstance> {
       child: GestureDetector(
         onTapUp: dismissAndDispose,
         onVerticalDragEnd: (details) {
-          if (details.primaryVelocity < 0) dismissAndDispose();
+          if ((details.primaryVelocity ?? 0) < 0) dismissAndDispose();
         },
         child: Material(
           child: Container(
